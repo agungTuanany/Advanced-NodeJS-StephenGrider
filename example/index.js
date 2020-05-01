@@ -10,7 +10,10 @@ const cluster		= require ("cluster")
 
 // Is the file being executed in master mode?
 if (cluster.isMaster) {
-	// cause index-plain.js to be executed *again* but in slave (child) mode
+	// Cause index.js to be executed *again* but in slave (child) mode
+	cluster.fork ()
+	cluster.fork ()
+	cluster.fork ()
 	cluster.fork ()
 	console.log ("cluster isMaster when called fork () ",cluster.isMaster)
 }
@@ -32,6 +35,10 @@ else {
 	app.get ("/", (req, res) => {
 		doWork (5000)
 		res.send ("Hi There")
+	})
+
+	app.get ("/fast", (req, res) => {
+		res.send ("This was fast")
 	})
 
 	app.listen (port, () => {

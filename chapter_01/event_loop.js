@@ -13,7 +13,7 @@
 // Holders
 const pendingTimers			= []
 const pendingOSTasks		= []
-const pendingOperations 	= []
+const pendingOperations		= []
 
 
 

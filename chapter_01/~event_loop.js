@@ -1,7 +1,10 @@
 "use strict"
 /*
  * Psudo code event-loop
- * Understanding how event-loop work
+ *
+ * Understanding how event-loop work:
+ * You can think of the event-loop as being like a control structure that decided what thread should doing any given point in time.
+ * The event-loop is the absolute core of every program that run. The run program exactly one event loop.
  *
  * The 5 steps below is the abstraction how your code be executed
  *

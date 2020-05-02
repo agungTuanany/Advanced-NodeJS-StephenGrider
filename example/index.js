@@ -3,7 +3,13 @@
  * Server with express | I don't like to use 3rd party libs when in cours
  * Implement "cluster mode"
  *
+ * test the cluster with:
+ * ? ab -c 6 -n 6 localhost:8000/
+ *
  */
+
+// Init Threadpool
+process.env.UV_THREADPOOL_SIZE = 1;
 
 // Dependencies
 const cluster		= require ("cluster")
@@ -13,28 +19,20 @@ if (cluster.isMaster) {
 	// Cause index.js to be executed *again* but in slave (child) mode
 	cluster.fork ()
 	cluster.fork ()
-	cluster.fork ()
-	cluster.fork ()
 	console.log ("cluster isMaster when called fork () ",cluster.isMaster)
 }
 else {
 	// I'm a child, I'm going to act like a server and do nothing else
+	const crypto		= require ("crypto")
 	const express		= require ('express')
 	const app			= express ()
 
 	const port = 8000
 
-	// Helpers Functions
-	const doWork = duration => {
-		const start = Date.now ()
-
-		// Loping while is true
-		while (Date.now () - start < duration) {}
-	}
-
 	app.get ("/", (req, res) => {
-		doWork (5000)
-		res.send ("Hi There")
+		crypto.pbkdf2 ("a", "b", 100000, 512, "sha512", () => {
+			res.send ("Hi There")
+		})
 	})
 
 	app.get ("/fast", (req, res) => {

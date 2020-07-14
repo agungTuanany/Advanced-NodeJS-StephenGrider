@@ -12,7 +12,7 @@ Behind NodeJS is `V8`-engine & `libuv`
 ## What is V8  ?
 
 The `V8` project is an open source **JavaScript engine** created by Google that
-written in C++ and JavaScript code. The purpose of `` is to be able to execute
+written in C++ and JavaScript code. The purpose of `V8` is to be able to execute
 JavaScript code outside of the browser.
 
 ## What is libuv ?
@@ -22,6 +22,8 @@ to the operating system underlying file system, it gives NodeJS users access to
 **networking** and it also handles some aspects of **concurrency** as well.
 
 `libuv` give access to developer to the file system, networking, etc..
+
+## What is Concurrency ?
 
 ## What is Concurrency (computer science) ?
 
@@ -69,7 +71,7 @@ codebase.
 So by using of NodeJS you don't have to work with all the C++ that exists
 iniside of `libuv` it self.
 
-After long explanation, *__the purpose of NodeJS__* is to give developer a nice
+After long explanation,  __*the purpose of NodeJS*__ is to give developer a nice
 consistent API for getting access to functionality that is ultimately
 implemented inside a `V8` and `libuv`.
 
@@ -91,11 +93,65 @@ functions and modules.
 
 ## How to understand what inside the 'src' folder in 'nodejs/node/src' ?
 
-![chapter-1-5.png](images/chapter-1-5.png "Defined pbkdf2 function")
-
 The `src` folder in `github/nodejs/node/src` is the C++ implementation of all
 those functions in `lib` folder.
 
 The `src` folder is where NodeJS actually pulls in `libuv` and `V8` project and
 flushes out the implementation of all the models are used.
+
+![chapter-1-5.png](images/chapter-1-5.png "Defined pbkdf2 function")
+
+## What is actually 'process.binding()' do ?
+
+Since NodeJS `V11`
+[process.binding()](https://nodejs.org/dist/latest-v12.x/docs/api/deprecations.html#deprecations_dep0111_process_binding)
+**Deprecated** and changes into `internalBinding()`.
+
+`process.binding()` is what serves as an actual bridge between the JavaScript
+side of NodeJS and C++ side. Which is where a lot of the **internal work** of
+everything that NodeJS implemented.
+
+Most of NodeJS code is relies upon ultimately C++ code.
+
+The code `env->SetMethod(target, "pbkdf2", PBKDF2)` in
+[`node/src/node_crypto.cc`](https://github.com/nodejs/node/blob/c7627da837af55e3a37ca0933b6a3247fc6c06bb/src/node_crypto.cc)
+is essentially an export functions statement to implemented outside of C++
+world.
+
+So `internalBinding()` functions is a bridge between
+`node/lib/internal/crypto.pbkdf2.js` into `node/src/node_crypto.cc`
+
+## Why should I know this stuff ?
+
+Is fundamental and sublime mandatory knowledge to know what behind the surface of NodeJS
+doing. So as developer you know **why** , **what**, and **where** the code coming
+from and works.
+
+## What is purpose 'using v8::--' in 'node_crypto.cc' ?
+
+Is essentially act as the intermediary (mediator) and allow values that are
+defined inside of JavaScript to be translated into C++ equivalence.
+
+So all the `using v8::..` are importing the C++ definition of JavaScript concepts.
+Like C++ understanding of what JavaScript `interger`, `array`, `boolean` etc..
+is. So this the `V8`-engine comes into play.
+
+The `V8` project is used to translate the NodeJS values that place inside
+different code like `boolean` or a `function` or an `object` and translate it
+into their c++ equivalents.
+
+
+## What is purpose 'uv_--' in 'node_crypto.cc' ?
+`libuv` is used for a lot of [concurrency](##-What-is-Concurrency-(computer-science)-?) and
+
+[concurrency](##-What-is-Concurrency-?)
+
+processing construct on the C++ side.
+
+So after this explanation as the Developer have a better sense of **how**
+whenever developer write a code and require in `node_modules` or `libraries`
+they are depending upon some JavaScript definition which eventually kind of maps
+up to actual C++ implementation
+
+
 

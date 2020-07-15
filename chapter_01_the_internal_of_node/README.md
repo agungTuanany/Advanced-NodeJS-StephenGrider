@@ -7,6 +7,7 @@
 4. [The Basics of Threads](#the-basics-of-threads)
 5. [The Node Event Loop](#the-node-event-loop)
 7. [Is Node Single Threads](#is-node-single-threads)
+8. [The `libuv` Thread pool](#the-`libuv`-thread-pool)
 <br/>
 <br/>
 
@@ -264,6 +265,10 @@ The event loop used by NodeJS to handle asynchronous code.
 Threads are units of instructions that are waiting to be executed by CPU.
 Deciding which order to execute these threads is referred to as scheduling.
 
+**[⬆ back to top](#table-of-contents)**
+<br/>
+<br/>
+
 ## The Node Event Loop
 <br/>
 
@@ -302,7 +307,7 @@ You may have read online from time to time that NodeJS is **single-threaded**,
 that was people claim. People say NodeJS is single-threaded. The truth is much
 more complicated.
 
-The Node **event-loop** that we just went through is truly **single-threaded**.
+The node **event-loop** that we just went through is truly **single-threaded**.
 When start up a program with NodeJS a single-instance of the event-loop is
 **created**; and **place** into one thread.
 
@@ -319,7 +324,7 @@ that are include inside of NodeJS that run; run outside of event-loop; and run
 outside of that single-thread.
 
 So simply declaring that node is single-threaded is **not absolutely true**. The
-event-lop uses a single-thread but a lot of the code developer write not
+event-loop uses a single-thread but a lot of the code developer write not
 actually execute inside that thread entirely.
 
 To prove NodeJS is node not absolutely single-thread just take a look in
@@ -332,7 +337,7 @@ So the CPU has to follow all threads order that we present them in.
 
 The result from **thread.js** for calling **pbkdf2()** of two takes exactly one
 second. So with two functions calls, if this really was a single-threaded
-system; I would have expected this entire process to take tow seconds total.
+system; I would have expected this entire process to take two seconds total.
 
 ![chapter-1-14.png](images/chapter-1-14.png "If node were single threaded")
 
@@ -343,8 +348,7 @@ original run of threads function where we were only doing one single hash.
 ![chapter-1-1.gif](images/gif/chapter-1-1.gif "If node were single threaded")
 <br/>
 
-
-![chapter-1-15.png](images/chapter-1-15.png "The really happend node are noti single threaded")
+![chapter-1-15.png](images/chapter-1-15.png "The really happend node are not single threaded")
 
 What really happen in NodeJS. NodeJS started up program at **zero second** and
 then it took exactly **one second** for both those function calls to get to the
@@ -354,3 +358,58 @@ So clearly this is indicating that something is happening to indicate that
 breaking out of a single-thread setup with NodeJS. Because if NodeJS only have
 one single thread we would have seen the first function call it complete and
 then the second call startup.
+
+**[⬆ back to top](#table-of-contents)**
+<br/>
+<br/>
+
+## The `libuv` Thread Pool
+<br/>
+
+![chapter-1-16.png](images/chapter-1-16.png "The libuv thread pool")
+<br/>
+
+**pbkdf2()** has both the JavaScript implementation but it actually delegated
+all the work done to the C++ side. So that's where the actual hashing process
+took places
+
+We also saw briefly in that
+[`node/src/node_crypto.cc`](https://github.com/nodejs/node/blob/c7627da837af55e3a37ca0933b6a3247fc6c06bb/src/node_crypto.cc)
+That seemed to be some references to a `libuv` library which as you recall gives
+NodeJS some better access to the underlying OS.
+
+The `libuv` module has another responsibility that is relevant for some very
+particular functions in the standard library. So for *some* standard library
+calls the NodeJS C++ side and `libuv` decide to do expensive calculations
+outside of the event-loop entirely.
+
+Instead `libuv` make use (create of) something called a [thread pool](#what-is-thrad-pool-?).
+So that means that in addition to that thread used for the event loop there are
+four other threads that can be used to offload expensive calculations that need
+to occur inside of application.
+
+Many other functions include in the NodeJS standard library will automatically
+make use of this thread pool.
+
+Remember the CPU runs all the instructions inside of a thread one by one. So
+far thread had some line of instruction inside of it, that said run this code
+that takes one second to run and we have to wait one second for that code to
+run. So by using thread pool we don't have to wait one second and do other
+things inside event-loop while calculations is occurring.
+
+### What is thread pool ?
+
+The thread pool **is** a series of four threads that can be used for running
+computationally intensive tasks such as pbkdf2() function by default `libuv`
+creates four threads in this thread pool.
+
+## What is uses of thread pool ?
+
+It's useful for doing computationally intensive tasks. because if event-loop was
+responsible for doing expensive computational task only,  that means NodeJS
+application **could do absolutely nothing else** while running other NodeJS
+functions library
+
+
+
+

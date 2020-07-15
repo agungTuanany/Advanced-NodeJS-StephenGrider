@@ -10,6 +10,7 @@
 8.  [The libuv Threadpool](#the-libuv-threadpool)
 9.  [Threadpool with Multithreading](#threadpool-with-multithreading)
 10. [Changing Threadpool Size](#changing-threadpool-size)
+11. [Common Threadpool Question](#commong-threadpool-question)
 <br/>
 <br/>
 
@@ -351,7 +352,7 @@ original run of threads function where we were only doing one single hash.
 
 ![chapter-1-15.png](images/chapter-1-15.png "The really happend node are not single threaded")
 
-What really happen in NodeJS. NodeJS started up program at **zero second** and
+What really happen in NodeJS; NodeJS started up program at **zero second** and
 then it took exactly **one second** for both those function calls to get to the
 callback.
 
@@ -384,7 +385,7 @@ particular functions in the standard library. So for *some* standard library
 calls the NodeJS C++ side and `libuv` decide to do expensive calculations
 outside of the event-loop entirely.
 
-Instead `libuv` make use (create of) something called a [threadpool](#what-is-threadpool-?).
+Instead `libuv` make use (create of) something called a [threadpool](#what-is-threadpool).
 So that means that in addition to that thread used for the event loop; there are
 four other threads that can be used to offload expensive calculations that need
 to occur inside of application.
@@ -474,3 +475,8 @@ process.env.UV_THREADPOOL_SIZE = 5
 ![chapter-1-7.gif](images/gif/chapter-1-7.gif "changing threadpool size into 5")
 
 ![chapter-1-8.gif](images/gif/chapter-1-8.gif "changing threadpool size into 5")
+
+## Common Threadpool Question
+<br/>
+
+![chapter-1-18.png](images/chapter-1-18.png "common threadpool questions")

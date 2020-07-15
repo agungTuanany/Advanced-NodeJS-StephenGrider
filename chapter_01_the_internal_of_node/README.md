@@ -2,11 +2,11 @@
 
 ## Table of Contents
 1. [Starting With NodeJS](#starting-with-nodejs)
-2. [Module Implementations](#module-implementations)
-3. [Node Backed by C++](#node-backed-by-c++)
+2. [Module Implementation](#module-implementation)
+3. [Node Backed by C](#node-backed-by-c)
 4. [The Basics of Threads](#the-basics-of-threads)
 5. [The Node Event Loop](#the-node-event-loop)
-7. [Is Node Single Threaded](#is-node-single-threaded)
+7. [Is Node Single Threads](#is-node-single-threads)
 <br/>
 <br/>
 
@@ -85,9 +85,10 @@ iniside of `libuv` it self.
 After long explanation,  __*the purpose of NodeJS*__ is to give developer a nice
 consistent API for getting access to functionality that is ultimately
 implemented inside a `V8` and `libuv`.
-<br/>
-<br/>
 
+**[⬆ back to top](#table-of-contents)**
+<br/>
+<br/>
 
 ## Module Implementation
 
@@ -111,11 +112,13 @@ those functions in `lib` folder.
 
 The `src` folder is where NodeJS actually pulls in `libuv` and `V8` project and
 flushes out the implementation of all the models are used.
+
+**[⬆ back to top](#table-of-contents)**
 <br/>
 <br/>
 
 
-## Node Backed by C++
+## Node Backed by C
 <br/>
 
 ![chapter-1-5.png](images/chapter-1-5.png "Defined pbkdf2 function")
@@ -168,6 +171,8 @@ So after this explanation as the Developer have a better sense of **how**
 whenever developer write a code and require in `node_modules` or `libraries`
 they are depending upon some JavaScript definition which eventually kind of maps
 up to actual C++ implementation
+
+**[⬆ back to top](#table-of-contents)**
 <br/>
 <br/>
 
@@ -280,10 +285,11 @@ behave (behaviors). So as developer if understand this event-loop then will be
 very well equipped (complete) to understand performance issues in NodeJS as
 well.
 
-
 Understanding the event-loop is though. So we just write kind like pseudo code
 that going to sort of emulate the event-loop, you can see
 [event-loop.js](./../example/event_loop.js)
+
+**[⬆ back to top](#table-of-contents)**
 <br/>
 <br/>
 
@@ -319,3 +325,32 @@ actually execute inside that thread entirely.
 To prove NodeJS is node not absolutely single-thread just take a look in
 [threads.js](./../example/threads.js)
 
+![chapter-1-13.png](images/chapter-1-13.png "If node were single threaded")
+
+Remember that a **thread** presents a **linear series of instructions** to CPU.
+So the CPU has to follow all threads order that we present them in.
+
+The result from **thread.js** for calling **pbkdf2()** of two takes exactly one
+second. So with two functions calls, if this really was a single-threaded
+system; I would have expected this entire process to take tow seconds total.
+
+![chapter-1-14.png](images/chapter-1-14.png "If node were single threaded")
+
+Above diagrams clearly was not what occurred. We clearly saw that both these
+logs occurred at basically the same time and it took just about equal to the
+original run of threads function where we were only doing one single hash.
+
+![chapter-1-1.gif](images/gif/chapter-1-1.gif "If node were single threaded")
+<br/>
+
+
+![chapter-1-15.png](images/chapter-1-15.png "The really happend node are noti single threaded")
+
+What really happen in NodeJS. NodeJS started up program at **zero second** and
+then it took exactly **one second** for both those function calls to get to the
+callback.
+
+So clearly this is indicating that something is happening to indicate that
+breaking out of a single-thread setup with NodeJS. Because if NodeJS only have
+one single thread we would have seen the first function call it complete and
+then the second call startup.

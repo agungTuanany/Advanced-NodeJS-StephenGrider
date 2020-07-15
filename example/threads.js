@@ -10,7 +10,8 @@
 
 // Control Thread Pool size
 // change it into 2, and see the result of the code
-process.env.UV_THREADPOOL_SIZE = 5
+process.env.UV_THREADPOOL_SIZE = 2
+// process.env.UV_THREADPOOL_SIZE = 5
 
 // Dependencies
 const crypto	= require ("crypto")

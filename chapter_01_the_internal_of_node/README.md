@@ -1,14 +1,15 @@
 # Chapter-1 The internal of Node
 
 ## Table of Contents
-1. [Starting With NodeJS](#starting-with-nodejs)
-2. [Module Implementation](#module-implementation)
-3. [Node Backed by C](#node-backed-by-c)
-4. [The Basics of Threads](#the-basics-of-threads)
-5. [The Node Event Loop](#the-node-event-loop)
-7. [Is Node Single Threads](#is-node-single-threads)
-8. [The `libuv` Thread pool](#the-libuv-thread-pool)
-9. [Threadpool with Multithreading](threadpool-with-multithreading)
+1.  [Starting With NodeJS](#starting-with-nodejs)
+2.  [Module Implementation](#module-implementation)
+3.  [Node Backed by C](#node-backed-by-c)
+4.  [The Basics of Threads](#the-basics-of-threads)
+5.  [The Node Event Loop](#the-node-event-loop)
+7.  [Is Node Single Threads](#is-node-single-threads)
+8.  [The libuv Threadpool](#the-libuv-threadpool)
+9.  [Threadpool with Multithreading](#threadpool-with-multithreading)
+10. [Changing Threadpool Size](#changing-threadpool-size)
 <br/>
 <br/>
 
@@ -363,15 +364,15 @@ then the second call startup.
 <br/>
 <br/>
 
-## The libuv Thread Pool
+## The libuv Threadpool
 <br/>
 
-![chapter-1-16.png](images/chapter-1-16.png "The libuv thread-pool")
+![chapter-1-16.png](images/chapter-1-16.png "The libuv threadpool")
 <br/>
 
 **pbkdf2()** has both the JavaScript implementation but it actually delegated
 all the work done to the C++ side. So that's where the actual hashing process
-took places
+took places.
 
 We also saw briefly in that
 [`node/src/node_crypto.cc`](https://github.com/nodejs/node/blob/c7627da837af55e3a37ca0933b6a3247fc6c06bb/src/node_crypto.cc)
@@ -383,27 +384,27 @@ particular functions in the standard library. So for *some* standard library
 calls the NodeJS C++ side and `libuv` decide to do expensive calculations
 outside of the event-loop entirely.
 
-Instead `libuv` make use (create of) something called a [thread-pool](#what-is-thread-pool-?).
-So that means that in addition to that thread used for the event loop there are
+Instead `libuv` make use (create of) something called a [threadpool](#what-is-threadpool-?).
+So that means that in addition to that thread used for the event loop; there are
 four other threads that can be used to offload expensive calculations that need
 to occur inside of application.
 
 Many other functions include in the NodeJS standard library will automatically
-make use of this thread-pool.
+make use of this threadpool.
 
 Remember the CPU runs all the instructions inside of a thread one by one. So
 far thread had some line of instruction inside of it, that said run this code
 that takes one second to run and we have to wait one second for that code to
-run. So by using thread-pool we don't have to wait one second and do other
+run. So by using threadpool we don't have to wait one second and do other
 things inside event-loop while calculations is occurring.
 
-### What is thread-pool ?
+### What is Threadpool ?
 
-The thread-pool **is** a series of four threads that can be used for running
+The threadpool **is** a series of four threads that can be used for running
 computationally intensive tasks such as pbkdf2() function by default `libuv`
-creates four threads in this thread-pool.
+creates four threads in this threadpool.
 
-### What is uses of thread pool ?
+### What is uses of Threadpool ?
 
 It's useful for doing computationally intensive tasks. because if event-loop was
 responsible for doing expensive computational task only,  that means NodeJS
@@ -417,16 +418,16 @@ functions library
 ## Threadpool with Multithreading
 <br/>
 
-![chapter-1-2.gif](images/gif/chapter-1-2.gif "thread-pool with multithreading")
+![chapter-1-2.gif](images/gif/chapter-1-2.gif "threadpool with multithreading")
 
 You can see a little pause, the running functions have some interlude result, between
 all the fourth with the fifth result. This result is extremely interesting and
-we can use these results to really define some information about the thread-pool
+we can use these results to really define some information about the threadpool
 and how it works.
 
 NOTE: depending on your machine CPU you might some different results here.
 
-![chapter-1-17.png](images/chapter-1-17.png "thread-pool with multithreading")
+![chapter-1-17.png](images/chapter-1-17.png "threadpool with multithreading")
 
 The first four call took two second to complete and then the fifth cal took one
 additional second. There's really two interesting things to note here, **first
@@ -439,10 +440,37 @@ interesting behavior.
 Let's try to figure out why we saw the change in timing with the first group
 that ran; and then only one second  to complete the fifth call.
 
-![chapter-1-3.gif](images/gif/chapter-1-3.gif "pbkdf2() called twice")
+![chapter-1-3.gif](images/gif/chapter-1-3.gif "pbkdf2() called two times")
 
-![chapter-1-4.gif](images/gif/chapter-1-4.gif "pbkdf2() fifth called")
+![chapter-1-4.gif](images/gif/chapter-1-4.gif "pbkdf2() called five times")
 
 **[⬆ back to top](#table-of-contents)**
 <br/>
 <br/>
+
+## Changing Threadpool Size
+
+```javascript
+// example/thread.js
+// by changing 'libuv' threadpool into two we only use two thread in
+//  single threadpool
+process.env.UV_THREADPOOL_SIZE = 2
+```
+
+![chapter-1-5.gif](images/gif/chapter-1-5.gif "changing threadpool size into 2")
+
+![chapter-1-6.gif](images/gif/chapter-1-6.gif "changing threadpool size into 2")
+
+So you have a better idea of how we can customize a threadpool and see what
+happens when increase or decrease the number of  thread that are available.
+
+```javascript
+// example/thread.js
+// by changing 'libuv' threadpool into five we use four thread in
+//  two threadpool
+process.env.UV_THREADPOOL_SIZE = 5
+```
+
+![chapter-1-7.gif](images/gif/chapter-1-7.gif "changing threadpool size into 5")
+
+![chapter-1-8.gif](images/gif/chapter-1-8.gif "changing threadpool size into 5")

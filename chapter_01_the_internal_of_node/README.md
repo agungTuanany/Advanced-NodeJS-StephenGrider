@@ -1,10 +1,11 @@
 # Chapter-1 The internal of Node
 
 ## Table of Contents
-1. [Starting With NodeJS](#Starting-With-NodeJS)
-2. [Module Implementtations](#Module-Implementations)
-3. [Node Backed by C++](#Node-Backed-by-C++)
-4. [The Basics of Threads](The-Basics-of-Threads)
+1. [Starting With NodeJS](##Starting-With-NodeJS)
+2. [Module Implementtations](##Module-Implementations)
+3. [Node Backed by C++](##Node-Backed-by-C++)
+4. [The Basics of Threads](##The-Basics-of-Threads)
+5. [The Node Event Loop](##The-Node-Event-Loop)
 <br/>
 <br/>
 
@@ -223,7 +224,7 @@ to end up being very relevant in the NodeJS world.
 
 If computer have more then 1 core of CPU then we can easily process **multiple
 threads** at the same time. Technically **one core** can process more than one
-threaded at a time through process called **multi threading** or
+threaded at a time through process called **multi-threading** or
 **hyper-threading**
 
 2. **Examine the work that is being done**
@@ -240,7 +241,7 @@ time.
 Your OS system scheduler has the ability to detect this downtime or this kind of
 pause between instructions and it can be decide to put threads number one
 (**Read file from HD**) on pause and then execute thread number two
-(**Multiply**) ass soon thread number two complete we can go back to threads
+(**Multiply**) a soon thread number two complete we can go back to threads
 number one and continue waiting on the hard drive to be read.
 
 ### What is multi-threading or hyper-threading ?
@@ -251,9 +252,37 @@ A single CPU ability can process more than one threaded at single time.
 
 The event loop used by NodeJS to handle asynchronous code.
 
-### What is Threads ??
+### What is Threads ?
 
 Threads are units of instructions that are waiting to be executed by CPU.
 Deciding which order to execute these threads is referred to as scheduling.
+
+## The Node Event Loop
+<br/>
+
+![chapter-1-11.png](images/chapter-1-11.png "Event Loop schema")
+
+Whenever a NodeJS program start up in computer NodejS automatically creates one
+thread and execute all of code inside of that one single-thread. Inside
+single-thread is something call the **event-loop**.
+
+You can think of the event-loop as being like a **control structure** that
+decide what **one thread** should be doing at any given point in time.
+
+This event-loop is the absolute core of every NodeJS program that run; and every
+program that run has exactly **one** event-loop.
+
+Understanding how the event-loop works is extremely important because a lot of
+**performance** concern about node boiled down to eventually how the event loop
+behave (behaviors). So as developer if understand this event-loop then will be
+very well equipped (complete) to understand performance issues in NodeJS as
+well.
+
+
+Understanding the event-loop is though. So we just write kind like pseudo code
+that going to sort of emulate the event-loop, you can see
+[event-loop.js](./../example/event_loop.js)
+
+
 
 

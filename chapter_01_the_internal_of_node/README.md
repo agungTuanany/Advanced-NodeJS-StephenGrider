@@ -1,11 +1,12 @@
 # Chapter-1 The internal of Node
 
 ## Table of Contents
-1. [Starting With NodeJS](##starting-tith-nodeJS)
-2. [Module Implementtations](##module-implementations)
-3. [Node Backed by C++](##node-backed-by-c++)
-4. [The Basics of Threads](##the-basics-of-threads)
-5. [The Node Event Loop](##the-node-event-loop)
+1. [Starting With NodeJS](#starting-with-nodejs)
+2. [Module Implementations](#module-implementations)
+3. [Node Backed by C++](#node-backed-by-c++)
+4. [The Basics of Threads](#the-basics-of-threads)
+5. [The Node Event Loop](#the-node-event-loop)
+7. [Is Node Single Threaded](#is-node-single-threaded)
 <br/>
 <br/>
 
@@ -263,7 +264,7 @@ Deciding which order to execute these threads is referred to as scheduling.
 
 ![chapter-1-11.png](images/chapter-1-11.png "Event Loop schema")
 
-Whenever a NodeJS program start up in computer NodejS automatically creates one
+Whenever a NodeJS program start up in computer NodeJS automatically creates one
 thread and execute all of code inside of that one single-thread. Inside
 single-thread is something call the **event-loop**.
 
@@ -283,7 +284,38 @@ well.
 Understanding the event-loop is though. So we just write kind like pseudo code
 that going to sort of emulate the event-loop, you can see
 [event-loop.js](./../example/event_loop.js)
+<br/>
+<br/>
+
+## Is node Single Threads
+<br/>
+
+![chapter-1-12.png](images/chapter-1-12.png "Is node single threads")
+
+You may have read online from time to time that NodeJS is **single-threaded**,
+that was people claim. People say NodeJS is single-threaded. The truth is much
+more complicated.
+
+The Node **event-loop** that we just went through is truly **single-threaded**.
+When start up a program with NodeJS a single-instance of the event-loop is
+**created**; and **place** into one thread.
 
 
+Now that's commonly seen as kind of a bad thing, because it means that our
+program can only run on **one core** of CPU, so if we have many cores inside of
+CPU then NodeJS **not** going to automatically take advantages (use) of those.
+MEAN: your code (program) might not run as fast as it could be, because it's
+**limited** to one single-thread.
 
+However **Some of Node** functions that are included inside of the standard
+library of NodeJS are not actually single-threaded. MEAN: some of the functions
+that are include inside of NodeJS that run; run outside of event-loop; and run
+outside of that single-thread.
+
+So simply declaring that node is single-threaded is **not absolutely true**. The
+event-lop uses a single-thread but a lot of the code developer write not
+actually execute inside that thread entirely.
+
+To prove NodeJS is node not absolutely single-thread just take a look in
+[threads.js](./../example/threads.js)
 

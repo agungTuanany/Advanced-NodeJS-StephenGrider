@@ -14,6 +14,7 @@
 12. [Explaining OS Operations](#explaining-os-operations)
 13. [OS Async Common Questions](#os-async-common-questions)
 14. [Review Chapter-1](#review-chapter-1)
+15. [Unexpected Event Loop Events](#unexpected-event-loop-events)
 <br/>
 <br/>
 
@@ -601,3 +602,50 @@ will see that terminology quite frequently and a **lot** of NodeJS documentation
 <br/>
 <br/>
 
+## Unexpected Event Loop Events
+
+We create [multitask.js](./../example/multitask.js), lets examine what going
+under the code,
+
+![chapter-1-22.png](/images/chapter-1-22.png "Unexpected event loop events")
+
+Remember when talking about the event-loop we had said that internally node
+makes us of a threadpool for some very specific function calls. In particular
+almost everything inside of the file system or `fs` module makes use of this
+threadpool; And crypto module functions **pbkdf2()** also makes use of the
+threadpool.
+
+The HTTPS in OS does not use of threadpool, instead it reaches out directly to
+the OS and leverage the OS to do all networking work.
+
+So while the `fs` module makes use a threadpool, the HTTPS module does not.
+
+![chapter-1-23.png](/images/chapter-1-23.png "multitask.js timeline")
+
+Above kind of the timeline `mutlitaks.js` for clarifying the time that we saw on
+all the console logs.
+
+![chapter-1-10.gif](/images/gif/chapter-1-10.gif "fs.readFile() timeline")
+
+So when first call **fs.readFile()** NodeJS it does not just go directly to the
+hard drive and immediately start reading the file; Instead it looks at the file
+on the hard drive and it tries to gather some statistics about it, like how
+large the file size is.
+
+That entire process revolve includes one round trip to the hard drive.
+
+So we go to the hard drive; Get some statistics about the file and then the
+result comes back to program. After NodeJS has those statistics and now know how
+large it can expect that file to be. Then it is now ready to actually go and
+read the file.
+
+So Then node actually goes back to the hard drive, gets the file contents and
+returns them to applications; and then eventually calls callback and that's when
+we saw console.log()
+
+The really key things to keep in mind here is that there were two **distinct
+pauses** that occurred. **first** paused were just waiting on the hard drive to
+return some statistics about file, **second** paused as NodeJS went back to the
+hard drive and started to actually read the contents out.
+
+![chapter-1-11.gif](/images/gif/chapter-1-11.gif "multitask.js chart timeline")

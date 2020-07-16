@@ -12,6 +12,7 @@
 10. [Changing Threadpool Size](#changing-threadpool-size)
 11. [Common Threadpool Question](#common-threadpool-question)
 12. [Explaining OS Operations](#explaining-os-operations)
+13. [OS Async Common Questions](#os-async-common-questions)
 <br/>
 <br/>
 
@@ -494,7 +495,7 @@ process.env.UV_THREADPOOL_SIZE = 5
 
 [async.js](./../example/async.js)
 
-![chapter-1-9.gif](images/gif/chapter-1-9.gif "changing threadpool size into 2")
+![chapter-1-9.gif](images/gif/chapter-1-9.gif "explaining OS operations")
 
 Notice how doRequest() functions call appears all six calls to be completed at
 the same exact time. This is **distinctly different behavior** that what we saw
@@ -504,7 +505,7 @@ By default the threadpool has **four threads** which means only four task can be
 processed at a time (single time). But in this case we have **six  tasks** all
 completed simultaneously. What's going on code?
 
-![chapter-1-19.png](images/chapter-1-19.png "changing threadpool size into 2")
+![chapter-1-19.png](images/chapter-1-19.png "libuv OS delegation")
 
 What we're seeing is more evidence of `libuv` in play but it's not related to
 threadpool. So just NodeJS standard library has some functions that make use of
@@ -526,3 +527,14 @@ process of making request. Cause **OS is making request** the request is **no
 blocking** of JavaScript code inside of event-loop or anything else of
 application.
 
+Everything is being done by the OS itself and we're **not touching or dealing**
+with a threadpool at all in this case.
+
+**[⬆ back to top](#table-of-contents)**
+<br/>
+<br/>
+
+## OS Async Common Questions
+<br/>
+
+![chapter-1-20.png](images/chapter-1-20.png "OS async common questions")

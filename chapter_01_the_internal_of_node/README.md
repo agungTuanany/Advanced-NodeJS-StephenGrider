@@ -10,7 +10,8 @@
 8.  [The libuv Threadpool](#the-libuv-threadpool)
 9.  [Threadpool with Multithreading](#threadpool-with-multithreading)
 10. [Changing Threadpool Size](#changing-threadpool-size)
-11. [Common Threadpool Question](#commong-threadpool-question)
+11. [Common Threadpool Question](#common-threadpool-question)
+12. [Explaining OS Operations](#explaining-os-operations)
 <br/>
 <br/>
 
@@ -190,10 +191,10 @@ event-loop as Developer should know **threads**.
 ### What is Process in 'computer science' ?
 
 Whenever developer run a programs on computer, computer start up something called
-a **process**
+a **process**.
 
 A process is an instance of a computer program that has been executed. Within
-a **single process** you can have a **multiple threads**
+a **single process** you can have a **multiple threads**.
 
 ![chapter-1-7.png](images/chapter-1-7.png " Single Process with Multiple Threads")
 
@@ -207,7 +208,7 @@ understanding something called **scheduling**.
 ### What is Scheduling ?
 
 Scheduling is the first operating systems ability to **decide** which thread to
-process at any given instant in time
+process at any given instant in time.
 
 To notice, your computer has a limited amount of resources available in CPU, and
 CPU can only process many instructions per second.
@@ -215,7 +216,7 @@ CPU can only process many instructions per second.
 This structure get really relevant when we have many active process and threads
 on your computer each **thread** have some urgent responsibility assigned to it.
 Like __*Gets mouse to move around the screen*__ or __*Gets keyboard press to
-appears*__
+appears*__.
 
 So **OS Scheduler** has to have look at all different **threads** that are
 asking to be process and figure out how to do some amount of work on each of
@@ -235,7 +236,7 @@ to end up being very relevant in the NodeJS world.
 If computer have more then 1 core of CPU then we can easily process **multiple
 threads** at the same time. Technically **one core** can process more than one
 threaded at a time through process called **multi-threading** or
-**hyper-threading**
+**hyper-threading**.
 
 2. **Examine the work that is being done**
 
@@ -294,7 +295,7 @@ well.
 
 Understanding the event-loop is though. So we just write kind like pseudo code
 that going to sort of emulate the event-loop, you can see
-[event-loop.js](./../example/event_loop.js)
+[event-loop.js](./../example/event_loop.js).
 
 **[⬆ back to top](#table-of-contents)**
 <br/>
@@ -399,13 +400,13 @@ that takes one second to run and we have to wait one second for that code to
 run. So by using threadpool we don't have to wait one second and do other
 things inside event-loop while calculations is occurring.
 
-### What is Threadpool ?
+### What is Threadpool
 
 The threadpool **is** a series of four threads that can be used for running
 computationally intensive tasks such as pbkdf2() function by default `libuv`
 creates four threads in this threadpool.
 
-### What is uses of Threadpool ?
+### What is uses of Threadpool
 
 It's useful for doing computationally intensive tasks. because if event-loop was
 responsible for doing expensive computational task only,  that means NodeJS
@@ -476,7 +477,52 @@ process.env.UV_THREADPOOL_SIZE = 5
 
 ![chapter-1-8.gif](images/gif/chapter-1-8.gif "changing threadpool size into 5")
 
+**[⬆ back to top](#table-of-contents)**
+<br/>
+<br/>
+
 ## Common Threadpool Question
 <br/>
 
 ![chapter-1-18.png](images/chapter-1-18.png "common threadpool questions")
+
+**[⬆ back to top](#table-of-contents)**
+<br/>
+<br/>
+
+## Explaining OS Operations
+
+[async.js](./../example/async.js)
+
+![chapter-1-9.gif](images/gif/chapter-1-9.gif "changing threadpool size into 2")
+
+Notice how doRequest() functions call appears all six calls to be completed at
+the same exact time. This is **distinctly different behavior** that what we saw
+previously with threadpool.
+
+By default the threadpool has **four threads** which means only four task can be
+processed at a time (single time). But in this case we have **six  tasks** all
+completed simultaneously. What's going on code?
+
+![chapter-1-19.png](images/chapter-1-19.png "changing threadpool size into 2")
+
+What we're seeing is more evidence of `libuv` in play but it's not related to
+threadpool. So just NodeJS standard library has some functions that make use of
+`libuv` threadpool it also has some functions that make use of code that is
+built in into the underlying OS through `libuv`.
+
+In this case `libuv` sees that developer are attempting to make an HTTP-request,
+neither `libuv` nor NodeJS or C++ has any to handle all of this super low level
+operations that involved with a network request. Instead `libuv` delegates the
+request making to the underlying OS.
+
+So actually OS that **does** the real HTTP-request, `libuv` is used to issue the
+request and then it just waits on the OS to emit a signal that some response has
+come back to the request.
+
+Because `libuv` is delegating the work done to OS, the OS itself decides whether
+to **make** a new thread or not, or just generally how to handle the entire
+process of making request. Cause **OS is making request** the request is **no
+blocking** of JavaScript code inside of event-loop or anything else of
+application.
+

@@ -607,7 +607,7 @@ will see that terminology quite frequently and a **lot** of NodeJS documentation
 We create [multitask.js](./../example/multitask.js), lets examine what going
 under the code,
 
-![chapter-1-22.png](/images/chapter-1-22.png "Unexpected event loop events")
+![chapter-1-22.png](./images/chapter-1-22.png "Unexpected event loop events")
 
 Remember when talking about the event-loop we had said that internally node
 makes us of a threadpool for some very specific function calls. In particular
@@ -620,12 +620,12 @@ the OS and leverage the OS to do all networking work.
 
 So while the `fs` module makes use a threadpool, the HTTPS module does not.
 
-![chapter-1-23.png](/images/chapter-1-23.png "multitask.js timeline")
+![chapter-1-23.png](./images/chapter-1-23.png "multitask.js timeline")
 
 Above kind of the timeline `mutlitaks.js` for clarifying the time that we saw on
 all the console logs.
 
-![chapter-1-10.gif](/images/gif/chapter-1-10.gif "fs.readFile() timeline")
+![chapter-1-10.gif](./images/gif/chapter-1-10.gif "fs.readFile() timeline")
 
 So when first call **fs.readFile()** NodeJS it does not just go directly to the
 hard drive and immediately start reading the file; Instead it looks at the file
@@ -648,4 +648,8 @@ pauses** that occurred. **first** paused were just waiting on the hard drive to
 return some statistics about file, **second** paused as NodeJS went back to the
 hard drive and started to actually read the contents out.
 
-![chapter-1-11.gif](/images/gif/chapter-1-11.gif "multitask.js chart timeline")
+![chapter-1-11.gif](./images/gif/chapter-1-11.gif "multitask.js chart timeline")
+
+**[⬆ back to top](#table-of-contents)**
+<br/>
+<br/>

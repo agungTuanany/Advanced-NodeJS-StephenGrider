@@ -13,6 +13,7 @@
 11. [Common Threadpool Question](#common-threadpool-question)
 12. [Explaining OS Operations](#explaining-os-operations)
 13. [OS Async Common Questions](#os-async-common-questions)
+14. [Review Chapter-1](#review-chapter-1)
 <br/>
 <br/>
 
@@ -538,3 +539,65 @@ with a threadpool at all in this case.
 <br/>
 
 ![chapter-1-20.png](images/chapter-1-20.png "OS async common questions")
+
+**[⬆ back to top](#table-of-contents)**
+<br/>
+<br/>
+
+## Review Chapter-1
+<br/>
+
+![chapter-1-21.png](images/chapter-1-21.png "review chapter-1")
+
+#### Process and execute code in index.js
+
+When developer run the command in this example `node index.js`, NodeJS
+immediately executes and process all the code inside of that file.
+
+Now one thing you might be curios about during this phase as well is **require**
+statement inside `index.js`. The instant when boot up NodeJS, all the code
+inside that file and any required files as well are executed.
+
+#### Entering event-loop
+
+The event-loop has one overarching big question, **Do we still have any work to
+do ?**, if we don't NodeJS instantly exit event-loop and there's nothing else todo.
+
+But if we do still have some amount of work todo then we go through a series of
+a couple of different steps.
+
+#### Run setTimout's, setInterval's
+
+We first check to see if there are nay setTimout() or setInterval() that need
+to be executed if not jump out into event-loop and exit.
+
+#### Run callbacks for any OS tasks or Threadpool task
+
+If any callback are ready to be called tied to anything related to OS task like
+**networking** or anything related to threadpool; and this is probably the vast
+(**huge**) majority of cod that developer write inside NodeJS applications.
+
+#### Pause and wait for stuff to happen
+
+Event-loop just pauses and sits around waits for stuff to happen; So it
+waits for some tasks to complete where it waits for some time or to come up or
+whatever else it might be waiting for.
+
+#### Run any setImmediate functions
+
+setImmediate() executed.
+
+#### Handle close events
+
+Finally handle any close events which allow us to do some amount of **cleanup**
+inside of applications; and  of course the last thing is to go back up to the
+event-loop and repeat entire process all over again.
+
+
+Remember that we refer to one execution of the event-loop as a **tick**. So you
+will see that terminology quite frequently and a **lot** of NodeJS documentation
+
+**[⬆ back to top](#table-of-contents)**
+<br/>
+<br/>
+

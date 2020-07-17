@@ -6,6 +6,7 @@
 3. [Clustering in theory](#clustering-in-theory)
 4. [Forking Children](#forking-children)
 6. [Clustering in Action](#clustering-in-action)
+7. [Benchmarking Server Performance](#benchmarking-server-performance)
 
 
 # Enhancing Performance
@@ -166,11 +167,11 @@ else {
 
 **[⬆ back to top](#table-of-contents)**
 <br/>
-<br/>Forking Children
+<br/>
 
 ## Clustering in Action
 
-see [index.js](./../example/index.js)
+See [index.js](./../example/index.js)
 
 When we start up one child that's not really doing a whole lot for us. We have
 one child that's basically doing the same thing as just executing server in
@@ -179,16 +180,86 @@ normal mode.
 Cause have only one child (`cluster.fork()`) we still only have one instance of
 the event-loop and we're not really gaining any performance benefit.
 
-**The practice**: if you have some **route** inside of your application that usually
-take a **while (long)** to process, but you have **other route** that are very
-quick; By using clustering you can start up multiple instances of your server
-that more evenly address all the incoming request into your application and have
-some more predictable response times.
+**The practice**: if you have some **route** inside of your application that
+usually take a **while (long)** to process, but you have **other route** that
+are very quick; By using clustering you can start up multiple instances of your
+server that more evenly address all the incoming request into your application
+and have some more predictable response times.
 
 It's sound clustering is the best choice in the NodeJS world, but there
 definitely are some corner cases to be **aware of**.
 
 **[⬆ back to top](#table-of-contents)**
 <br/>
-<br/>Forking Children
+<br/>
+
+## Benchmarking Serve Performance
+
+There's definite point diminishing (decrescent) return when you start using
+clustering, in some cases can actually be kind of catastrophic for application.
+
+So we need more scientific way of measuring long it takes for server to process
+requests.
+
+```javascript
+// Benchmarking
+$ ab -c 50 -n 500 localhost:800/fast
+
+// result be like
+Benchmarking localhost (be patient)
+Completed 100 requests
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Finished 500 requests
+
+
+Server Software:
+Server Hostname:        localhost
+Server Port:            8000
+
+Document Path:          /fast
+Document Length:        13 bytes
+
+Concurrency Level:      50
+Time taken for tests:   0.583 seconds
+Complete requests:      500
+Failed requests:        0
+Total transferred:      106000 bytes
+HTML transferred:       6500 bytes
+Requests per second:    857.39 [#/sec] (mean)    // XXX Important result XXXX
+Time per request:       58.317 [ms] (mean)       // XXX Important result XXX
+Time per request:       1.166 [ms] (mean, across all concurrent requests)
+Transfer rate:          177.51 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.3      0       2
+Processing:     5   55  10.6     56      72
+Waiting:        0   55  10.7     56      72
+Total:          6   55  10.4     56      72
+
+Percentage of the requests served within a certain time (ms)
+  50%     56
+  66%     59
+  75%     62
+  80%     63
+  90%     67
+  95%     68
+  98%     71
+  99%     71
+ 100%     72 (longest request)
+```
+
+### What is benchmarking
+
+Benchmarking is the act of measuring performance an comparing the result to
+another system's results or widely accepted standard through a unified
+procedure.
+
+
+
+
+
 

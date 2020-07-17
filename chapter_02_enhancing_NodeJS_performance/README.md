@@ -4,6 +4,7 @@
 1. [Enhancing Performance](#enhancing-performance)
 2. [Blocking the Event Loop](#blocking-the-event-loop)
 3. [Clustering in theory](#clustering-in-theory)
+4. [Forking Children](#forking-children)
 
 
 # Enhancing Performance
@@ -123,11 +124,39 @@ time in a slightly different mode, that starts up **worker instance**.
 time it's going to produce **cluster manager**, **second** or every time after
 that it's going to be producing **worker instances**.
 
-
-
-
 ## What is cluster manager
 
 Cluster manager is responsible for monitoring the health of individual instances
 of applications that we're going to launch at the same time on singular
 computer.
+
+**[⬆ back to top](#table-of-contents)**
+<br/>
+<br/>Forking Children
+
+## Forking Children
+
+```javascript
+// /example/.index.js
+...
+const cluster = require("cluster")
+
+console.log (cluster.isMaster) \\ true
+...
+```
+
+When NodeJS execute `index.js` NodeJS execute **content** that file; and NodeJS
+starts up a copy of node that refer to as the **cluster manager**; The cluster
+manager has `isManager` property always set to `true`; As soon start forking off
+(`cluster.fork()`) additional worker instances `isMananger` set to `false`.
+
+```javascript
+// Is the file being executed in master mode?
+if (cluster.isMaster) {
+    // Cause index.js to be executed *again* but in "slave | child mode"
+    cluster.fork()
+}
+else {
+    ...
+}
+```

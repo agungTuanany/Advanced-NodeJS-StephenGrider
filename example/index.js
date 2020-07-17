@@ -10,26 +10,40 @@
  */
 
 // Dependencies
-const app     = express()
+const express = require("express")
+const cluster = require("cluster")
 
+const app  = express()
 const port = 8000
 
-const doWork = (duration) => {
-    const start = Date.now()
+// console.log (cluster.isMaster)
 
-    while (Date.now() - start < duration) {
-        //...
-    }
+// Is the file being executed in master mode?
+if (cluster.isMaster) {
+    // Cause index.js to be executed *again* but in "slave | child mode"
+    cluster.fork()
 }
-app.get ("/", (req, res) => {
+else {
+    // I am a child, I'm going to act like a server an do nothing else
+    const doWork = (duration) => {
+        const start = Date.now()
 
-    // Blocking any other request that coming
-    doWork(5000)
+        //while (Date.now() - start < duration) {
+        //    //...
+        //}
+    }
+    app.get ("/", (req, res) => {
 
-    res.send("Hello world")
-})
+        // Blocking any other request that coming
+        doWork(5000)
 
-app.listen (port, () => {
-    console.log ('\x1b[36m%s\x1b[0m',"index.js is running on port:", port)
-})
+        res.send("Hello world")
+    })
+
+    app.listen (port, () => {
+        console.log ('\x1b[36m%s\x1b[0m',"index.js is running on port:", port)
+    })
+}
+
+
 

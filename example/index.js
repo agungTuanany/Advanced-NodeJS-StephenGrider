@@ -4,44 +4,32 @@
  *
  * XXX TODO use NodeJS standart lib for "worker_threads" either installing
  * "webworker-threads" in NodeJS V12-LTS.XXX
- * XXX FIXME: This code need to change!!! cause not working XXX
+ *
+ * XXX FIXME: This code need to  change!!! cause not working XXX
  *
  */
 
 // Dependencies
-const crypto		= require ("crypto")
-const express		= require ('express')
-const app			= express ()
-const Worker		= require ("worker_threads")
+const app     = express()
 
 const port = 8000
 
+const doWork = (duration) => {
+    const start = Date.now()
+
+    while (Date.now() - start < duration) {
+        //...
+    }
+}
 app.get ("/", (req, res) => {
-	const worker = new Worker ( function () {
-		this.onmessage = function () {
-			let counter = 0
-			while (conter < 1e9) {
-				counter++
-			}
 
+    // Blocking any other request that coming
+    doWork(5000)
 
-			postMessage (counter)
-		}
-	})
-
-	worker.onmessage = function (message) {
-		console.log (message.data)
-		res.send (""+message.data)
-	}
-
-	worker.postMessage ()
-})
-
-app.get ("/fast", (req, res) => {
-	res.send ("This was fast")
+    res.send("Hello world")
 })
 
 app.listen (port, () => {
-	console.log ('\x1b[36m%s\x1b[0m',"index.js is running on port:", port)
+    console.log ('\x1b[36m%s\x1b[0m',"index.js is running on port:", port)
 })
 

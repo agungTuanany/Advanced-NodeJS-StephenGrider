@@ -2,7 +2,7 @@
 /*
  * Server with express | I don't like to use 3rd party libs when in cours
  *
- * XXX TODO use NodeJS standart lib for "worker_threads" either installing
+ * XXX TODO use NodeJS standard lib for "worker_threads" either installing
  * "webworker-threads" in NodeJS V12-LTS.XXX
  *
  * XXX FIXME: This code need to  change!!! cause not working XXX

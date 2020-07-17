@@ -576,7 +576,7 @@ to be executed if not jump out into event-loop and exit.
 
 If any callback are ready to be called tied to anything related to OS task like
 **networking** or anything related to threadpool; and this is probably the vast
-(**huge**) majority of cod that developer write inside NodeJS applications.
+(**huge**) majority of code that developer write inside NodeJS applications.
 
 #### Pause and wait for stuff to happen
 

@@ -9,17 +9,15 @@
  *
  */
 
-// Dependencies
-const express = require("express")
-const cluster = require("cluster")
+process.env.UV_THREADPOOL_SIZE = 1
 
-const app  = express()
-const port = 8000
+// Dependencies
+const cluster = require("cluster")
 
 // Is the file being executed in master mode?
 if (cluster.isMaster) {
     // Cause index.js to be executed *again* but in "slave | child mode"
-console.log ("if isMaster is 'true' return:", cluster.isMaster)
+    console.log ("isMaster status:", cluster.isMaster)
     cluster.fork()
     // cluster.fork()
     // cluster.fork()
@@ -27,19 +25,22 @@ console.log ("if isMaster is 'true' return:", cluster.isMaster)
 }
 else {
     // I am a child, I'm going to act like a server an do nothing else
-    const doWork = (duration) => {
-        const start = Date.now()
+    const express = require("express")
+    const crypto = require("crypto")
+    const app  = express()
 
-        while (Date.now() - start < duration) {
-            //...
-        }
+    const port = 8000
+
+    function getCrypto(res) {
+        crypto.pbkdf2("a", "b", 100000, 512, "sha512", () => {
+            res.send("Hello world")
+        })
     }
+
     app.get ("/", (req, res) => {
-
-        // Blocking any other request that coming
-        doWork(5000)
-
-        res.send("Hello world")
+        //res.send("Hello world")
+        getCrypto(res)
+        console.log ("isMaster status:", cluster.isMaster)
     })
 
     app.get("/fast", (req, res) => {
@@ -49,5 +50,5 @@ else {
     app.listen (port, () => {
         console.log ('\x1b[36m%s\x1b[0m',"index.js is running on port:", port)
     })
-console.log ("if isMaster is 'false' return:", cluster.isMaster)
+    console.log ("isMaster status:", cluster.isMaster)
 }

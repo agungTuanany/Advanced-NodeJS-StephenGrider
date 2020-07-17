@@ -193,7 +193,7 @@ definitely are some corner cases to be **aware of**.
 <br/>
 <br/>
 
-## Benchmarking Serve Performance
+## Benchmarking Server Performance
 
 There's definite point diminishing (decrescent) return when you start using
 clustering, in some cases can actually be kind of catastrophic for application.
@@ -228,7 +228,7 @@ Complete requests:      500
 Failed requests:        0
 Total transferred:      106000 bytes
 HTML transferred:       6500 bytes
-Requests per second:    857.39 [#/sec] (mean)    // XXX Important result XXXX
+Requests per second:    857.39 [#/sec] (mean)    // XXX Important result XXX
 Time per request:       58.317 [ms] (mean)       // XXX Important result XXX
 Time per request:       1.166 [ms] (mean, across all concurrent requests)
 Transfer rate:          177.51 [Kbytes/sec] received
@@ -257,9 +257,3 @@ Percentage of the requests served within a certain time (ms)
 Benchmarking is the act of measuring performance an comparing the result to
 another system's results or widely accepted standard through a unified
 procedure.
-
-
-
-
-
-

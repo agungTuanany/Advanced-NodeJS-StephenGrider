@@ -5,6 +5,7 @@
 2. [Blocking the Event Loop](#blocking-the-event-loop)
 3. [Clustering in theory](#clustering-in-theory)
 4. [Forking Children](#forking-children)
+6. [Clustering in Action](#clustering-in-action)
 
 
 # Enhancing Performance
@@ -100,7 +101,7 @@ challenging just by diagrams.
 
 ![chapter-2-4.png](images/chapter-2-4.png "clustering in theory")
 
-when use clustering the entire flow above changes little bit.
+When use clustering the entire flow above changes little bit.
 
 ![chapter-2-5.png](images/chapter-2-5.png "clustering in theory")
 
@@ -151,6 +152,8 @@ manager has `isManager` property always set to `true`; As soon start forking off
 (`cluster.fork()`) additional worker instances `isMananger` set to `false`.
 
 ```javascript
+// /example/.index.js
+...
 // Is the file being executed in master mode?
 if (cluster.isMaster) {
     // Cause index.js to be executed *again* but in "slave | child mode"
@@ -160,3 +163,32 @@ else {
     ...
 }
 ```
+
+**[⬆ back to top](#table-of-contents)**
+<br/>
+<br/>Forking Children
+
+## Clustering in Action
+
+see [index.js](./../example/index.js)
+
+When we start up one child that's not really doing a whole lot for us. We have
+one child that's basically doing the same thing as just executing server in
+normal mode.
+
+Cause have only one child (`cluster.fork()`) we still only have one instance of
+the event-loop and we're not really gaining any performance benefit.
+
+**The practice**: if you have some **route** inside of your application that usually
+take a **while (long)** to process, but you have **other route** that are very
+quick; By using clustering you can start up multiple instances of your server
+that more evenly address all the incoming request into your application and have
+some more predictable response times.
+
+It's sound clustering is the best choice in the NodeJS world, but there
+definitely are some corner cases to be **aware of**.
+
+**[⬆ back to top](#table-of-contents)**
+<br/>
+<br/>Forking Children
+

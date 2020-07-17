@@ -16,21 +16,23 @@ const cluster = require("cluster")
 const app  = express()
 const port = 8000
 
-// console.log (cluster.isMaster)
-
 // Is the file being executed in master mode?
 if (cluster.isMaster) {
     // Cause index.js to be executed *again* but in "slave | child mode"
+console.log ("if isMaster is 'true' return:", cluster.isMaster)
     cluster.fork()
+    // cluster.fork()
+    // cluster.fork()
+    // cluster.fork()
 }
 else {
     // I am a child, I'm going to act like a server an do nothing else
     const doWork = (duration) => {
         const start = Date.now()
 
-        //while (Date.now() - start < duration) {
-        //    //...
-        //}
+        while (Date.now() - start < duration) {
+            //...
+        }
     }
     app.get ("/", (req, res) => {
 
@@ -40,10 +42,12 @@ else {
         res.send("Hello world")
     })
 
+    app.get("/fast", (req, res) => {
+        res.send ("this was fast")
+    })
+
     app.listen (port, () => {
         console.log ('\x1b[36m%s\x1b[0m',"index.js is running on port:", port)
     })
+console.log ("if isMaster is 'false' return:", cluster.isMaster)
 }
-
-
-

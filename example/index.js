@@ -1,9 +1,9 @@
 "use strict"
 /*
- * Server with express | I don't like to use 3rd party libs when in cours
+ * Server with express | I don't like to use 3rd party libs when in course
+ * XXX TODO:
  *
- * XXX TODO use NodeJS standard lib for "worker_threads" either installing
- * "webworker-threads" in NodeJS V12-LTS.XXX
+ * example use "cluster" in NodeJS
  *
  */
 

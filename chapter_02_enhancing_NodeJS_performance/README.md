@@ -1,14 +1,15 @@
 # Chapter-2 Enhancing Performance
 
 ## Table of Contents
-1. [Enhancing Performance](#enhancing-performance)
-2. [Blocking the Event Loop](#blocking-the-event-loop)
-3. [Clustering in theory](#clustering-in-theory)
-4. [Forking Children](#forking-children)
-6. [Clustering in Action](#clustering-in-action)
-7. [Benchmarking Server Performance](#benchmarking-server-performance)
-8. [Need More Children Benchmarking](#need-more-children-benchmarking)
-9. [PM2 Configuration](#pm2-configuration)
+1.  [Enhancing Performance](#enhancing-performance)
+2.  [Blocking the Event Loop](#blocking-the-event-loop)
+3.  [Clustering in theory](#clustering-in-theory)
+4.  [Forking Children](#forking-children)
+6.  [Clustering in Action](#clustering-in-action)
+7.  [Benchmarking Server Performance](#benchmarking-server-performance)
+8.  [Need More Children Benchmarking](#need-more-children-benchmarking)
+9.  [PM2 Configuration](#pm2-configuration)
+10. [Worker Threads in Action](#worker-threads-in-action)
 
 
 # Enhancing Performance
@@ -684,3 +685,51 @@ of every single applications.
 **[⬆ back to top](#table-of-contents)**
 <br/>
 <br/>
+
+## Worker Threads in Action
+
+![chapter-2-12.png](./images/chapter-2-12.png "worker-threads")
+
+At the top of diagram we have **App thread**  that application is running in.
+**Our App** is represent the event-loop; at bottom is the thread that will be
+created by this new worker object that is created by the web
+[`worker_threads`](https://nodejs.org/dist/latest-v12.x/docs/api/worker_threads.html)
+library.
+
+So bottom object is a separate threads that is also running on computer, because
+it's in **separate thread** that mean it can do a lot of **blocking work** or
+a lot of heavy calculations and **not necessarily block** any of the code that that
+is being executed inside **event-loop**.
+
+**NOTE**: thing that to remember that a lot of code inside of NodeJS library
+already makes use of the `libuv` threadpool. So if you're thinking that we're
+going to be running like that hash function really quickly by making use of
+`worker_threads` that's not entirely true.  Because `pbkdf2()` already runs
+inside of separate thread to make sure that's it does not block event-loop.
+
+So personal opinion here is that this `worker_threads` not quite as useful.
+Cause keep in mind, **you are already using code that is being executed in
+separate thread**.
+
+You may use `worker_threads` if you have some **really heavy duty business
+logic** of your own  that you want to execute off of the event-loop directly.
+
+### Communicate separate threads
+
+To communicate with separate thread we don't get to have like a very direct
+means of conversation with the worker that's being done in **worker** (bottom
+object diagram). **MEAN** we cannot freely reference variables inside of the
+worker form application; We have to do some very **direct means** of
+conversation by using **postMessage** and **onMessage** system.
+
+**worker Interface** box diagram represent the worker object that gonna create
+inside server. The **worker interface** then create `worker_threads` and
+communicate back and forward between two by using **postMessage** and
+**onMessage**.
+
+**onMessage** is a property that assign a function; that function will then be
+invoked any time we call **postMessage** on the opposing side. **MEAN**: if you
+call **postMessage** from server it's going to invoke the function assigned
+**onMessage** inside the `worker_threads`. So on as the opposite as well. If
+call **postMessage** from `worker_threads` it'll invoke a function assigned
+to the **onMessage** on **worker Inteface**.

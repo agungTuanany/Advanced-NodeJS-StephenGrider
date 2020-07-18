@@ -5,8 +5,6 @@
  * XXX TODO use NodeJS standard lib for "worker_threads" either installing
  * "webworker-threads" in NodeJS V12-LTS.XXX
  *
- * XXX FIXME: This code need to  change!!! cause not working XXX
- *
  */
 
 process.env.UV_THREADPOOL_SIZE = 1
@@ -17,11 +15,10 @@ const cluster = require("cluster")
 // Is the file being executed in master mode?
 if (cluster.isMaster) {
     // Cause index.js to be executed *again* but in "slave | child mode"
-    console.log ("isMaster status:", cluster.isMaster)
-    cluster.fork()
-    // cluster.fork()
-    // cluster.fork()
-    // cluster.fork()
+    cluster.fork()      // as you CPU core
+    cluster.fork()      // as your CPU core
+
+    // console.log ("isMaster status:", cluster.isMaster)
 }
 else {
     // I am a child, I'm going to act like a server an do nothing else
@@ -40,7 +37,6 @@ else {
     app.get ("/", (req, res) => {
         //res.send("Hello world")
         getCrypto(res)
-        console.log ("isMaster status:", cluster.isMaster)
     })
 
     app.get("/fast", (req, res) => {
@@ -50,5 +46,5 @@ else {
     app.listen (port, () => {
         console.log ('\x1b[36m%s\x1b[0m',"index.js is running on port:", port)
     })
-    console.log ("isMaster status:", cluster.isMaster)
+    // console.log ("isMaster status:", cluster.isMaster)
 }

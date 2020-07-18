@@ -7,6 +7,7 @@
 4. [Forking Children](#forking-children)
 6. [Clustering in Action](#clustering-in-action)
 7. [Benchmarking Server Performance](#benchmarking-server-performance)
+8. [Need More Children | Benchmarking](#need-more-children-|-benchmarking)
 
 
 # Enhancing Performance
@@ -59,7 +60,7 @@ So some **request** comes in, **server processes** and **generates a response**.
 
 However we start to run into some big issues when these **incoming request**
 takes **some amount time** to process; So if we have some request coming in that
-requires a lot of processing power like a lot of JavaScript that take a long
+requires a lot of processing power; like a lot of JavaScript that take a long
 time to run through, then NodeJS server is not going to be able to process
 incoming requests as effectively as they otherwise would.
 
@@ -134,7 +135,7 @@ computer.
 
 **[⬆ back to top](#table-of-contents)**
 <br/>
-<br/>Forking Children
+<br/>
 
 ## Forking Children
 
@@ -257,3 +258,298 @@ Percentage of the requests served within a certain time (ms)
 Benchmarking is the act of measuring performance an comparing the result to
 another system's results or widely accepted standard through a unified
 procedure.
+
+**[⬆ back to top](#table-of-contents)**
+<br/>
+<br/>
+
+## Need More Children | Benchmarking
+
+The case when use cluster to send a request into server with a larger amount of
+request is server performance start to drop off cause take more amount of time
+for each request.
+
+### 1 worker, 1 thread
+
+![chapter-2-1.gif](./images/gif/chapter-2-1.gif "Benchamark use case: 1 worker, 1 thread")
+
+Above an example with [index.js](./../example/index.js).
+
+We have two request coming into server to run `pbkdf2()`, now the instant that
+the **first request** comes in (remember they're being issued at the same time)
+but essentially one of those request is going to reach server before other. That
+very first request immediately gets picked up by the threadpool and server start
+to process it.
+
+As soon as `pbkdf2()` is complete server response at about **1 second** mark and
+that explains the minimum response time:
+
+```bash
+$ ab -c 2 -n 2 localhost:8000/
+
+...
+...
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.1      0       0
+Processing:  1093 1061 747.7   2150    2150     // XXX time XXX
+Waiting:     1092 1621 747.8   2150    2150
+Total:       1093 1622 747.6   2150    2150
+
+...
+...
+```
+
+Now at the same exact same time, the **second request** took additional
+1 second, and so it eventually sent back the result at 2 second, that explains
+in percentage time:
+
+```bash
+$ ab -c 2 -n 2 localhost:8000/
+...
+...
+Percentage of the requests served within a certain time (ms)
+  50%   2150 // XXX 2 second XXX
+  66%   2150
+  75%   2150
+  80%   2150
+  90%   2150
+  95%   2150
+  98%   2150
+  99%   2150
+ 100%   2150 (longest request)
+
+```
+
+So the **first call** took about 1 second, the **second call** took 2 second;
+And **yes they occurred at exactly the same time**, but the server only has the
+ability to process one process `pbk2()` or hashing function at a time because we
+restricted hat threadpool size to exactly **one thread** (`cluster.fork()`).
+
+### Clustering, 2 children
+
+```javascript
+// ./example/index.js
+....
+....
+if (cluster.isMaster){
+    cluster.fork()
+    cluster.fork()  // Add cluster
+}
+else {
+....
+}
+```
+Run benchmarking
+
+```javascript
+$ ab -c 2 -n 2 localhost:8000/
+
+....
+....
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.1      0       0
+Processing:  1161 1166   6.9   1170    1170     // XXX time XXX
+Waiting:     1159 1624   6.7   1169    1159
+Total:       1161 1622   7.0   1171    1171
+
+Percentage of the requests served within a certain time (ms)
+  50%   1171 // XXX 1 second took per request XXX
+  66%   1171
+  75%   1171
+  80%   1171
+  90%   1171
+  95%   1171
+  98%   1171
+  99%   1171
+ 100%   1171 (longest request)
+```
+![chapter-2-8.gif](./images/chapter-2-8.png "Benchamark use case: with clustering, 2 children")
+
+Above diagram and code example explain the request into server with
+**clustering**. The two request very clearly have been processed just about in
+**parallel**.
+
+The both request came in clearly **first child** inside of cluster picked up the
+**first call** and started processing it; and then the **second child** inside
+of cluster started processing the **second call**. They both completed at the
+1 second mark, we send back the response and everyone was happy.
+
+So by using clustering we very clearly like, no two ways about it by using
+clustering, we have gotten a very distinct benefit here.
+
+Using **worker threads** took **2 second** to do two requests. By using
+**clustering** it took **1 second** to do two requests.
+
+### More cluster, nor performance
+
+The case is if we use more fork (`cluster.fork()`), whenever start up the
+application we get more separate instances and the separate instances can all be
+used to process incoming requests, and every one can be served a response back
+even faster than before or at least that's what **developer** might think.
+
+Case:
+```javascript
+// ./example/index.js
+....
+....
+if (cluster.isMaster){
+    cluster.fork()
+    cluster.fork()  // Add cluster
+    cluster.fork()  // Add more cluster
+    cluster.fork()  // Add more cluster
+    cluster.fork()  // Add more cluster
+    cluster.fork()  // Add more cluster
+}
+else {
+....
+}
+```
+
+So we've hot **six `cluster.fork()`**, whenever NodeJS start up application
+we're going to get **six** separate instances can all be used to process
+incoming request and every requests can be served a response back even faster
+than before; that's what we might think. That's not what's really going to
+happen here.
+
+```bash
+$ ab -c 6 -d 6 localhost:800/
+....
+....
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.1      0       0
+Processing:  3456 3490  26.3   3508    3521     // XXX minimun time XXX
+Waiting:     3454 3488  26.2   3505    3519
+Total:       3457 3491  26.1   3509    3521     // XXX maximum time XXX
+
+Percentage of the requests served within a certain time (ms)
+  50%   3509 // XXX 1 second took per request XXX
+  66%   3509
+  75%   3510
+  80%   3510
+  90%   3521
+  95%   3521
+  98%   3521
+  99%   3521
+ 100%   3521 (longest request)
+```
+![chapter-2-9.png](./images/chapter-2-9.png "Benchamark use case: with clustering, 6 thread")
+
+
+Above code and diagram interpret: When we start to get six request in every
+single one took all the way out to 3.5 seconds.
+
+NOTE: every computer has some upper limit to the amount of bits data that it can
+just crunch at any given point in time.
+
+So when run code like so and we do six at the same time that means that in those
+six separate threads that are running six separate children we are **bouncing**
+between every hash functions (`pbkdf2()`) called at the exact same time; and CPU
+is trying to do a little bit of work on all request at exact same time.
+
+The result is that we do **not** get code executed six times **faster**. Is it
+took significantly longer to eventually get a response back from server to some
+everyone.
+
+So although we were able to address all these incoming request at the same time,
+the net result was that our all overall performance suffered because CPU was
+trying to bounce around and process all these incoming request at exactly the
+same amount of time. This is a very clear case where we have kind **over
+allocated** instances inside of **cluster**.
+
+Even though we can definitely start processing all these hashes request at the
+exact same time, the result is that we've kind of created like big average
+**bottleneck** of mediocrity (just ordinariness) where we can only do so much at
+any given time and we've been trying to do too much, so it;'s slowed down the
+overall result.
+
+So clearly there is an upper bound to the number of children that we might want
+to create inside of cluster whenever we have some computationally intensive work
+to do inside of application.
+
+### Resolve upper bound
+<br/>
+
+
+
+```javascript
+// ./example/index.js
+....
+....
+if (cluster.isMaster){
+    cluster.fork()
+    cluster.fork()  // Add cluster
+}
+else {
+....
+}
+```
+
+```bash
+$ ab -c 6 -d 6 localhost:800/
+....
+....
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0    0.1      0       0
+Processing:  1128 2277 1026.3   2256    3445     // XXX minimun time XXX
+Waiting:     1126 2276 1026.2   2256    3445
+Total:       1128 2277 1026.2   2256    3445     // XXX maximum time XXX
+
+Percentage of the requests served within a certain time (ms)
+  50%   2256        // XXX 1 second took per request XXX
+  66%   2256
+  75%   3432
+  80%   3432
+  90%   3445
+  95%   3445
+  98%   3445
+  99%   3445
+ 100%   3445 (longest request)
+```
+
+We get the result back went all the way own to about 3.4 second for the
+**longest** request; But if you really breakdown you'll notice that fastest
+request are processed in just 1 second **(1128)**.
+
+![chapter-2.2.png](./images/gif/chapter-2-2.gif "resolve cluster upper bound")
+
+In above diagram we are using clustering and we just use **two children**
+(`cluster,fork()`). With two children we know that we can only process at best
+two hashes (`pbkdf2()`) at any given time.
+
+Now we are still kind of subject to an overload here but let's just kind of look
+at the diagram. The all six requests technically come in at exact the same time.
+They all come into server at exactly time **0 second**. The bars here represent
+when CPU was actually working on each hash.
+
+So the instances of first two function  calls come in immediately get redirected
+over to CPU; each hash is executed on one CPU and gets the absolute full
+dedicated attention of that one CPU.
+
+So the first tow take form time 0 to 1 second; and after that one second already
+finished the first two hashes; then two running children inside of cluster
+cleared those request out; and ready for next two, and so on.
+
+Even though used fewer children, actually have ended up with arguably a far
+better performance profile then we did previously. Not only finishing all of
+request hashes more quickly, we get everything faster than **3.5 second** but
+a bulk of those hashes are being finished significantly faster.
+
+So by increasing the number of children that you have inside application
+dramatically beyond the number of actual logical core on physical CPU core,
+you're going to have negative effect on the performance of your system.
+
+**Conclusion**: Cluster is great but you gotta use with not go overboard with.
+In general you want to match your number of cluster children (`cluster.fork()`)
+to either the number of physical cores computer you have. But some of the
+documentation around clustering uses **logical core** instead.
+
+Using logical core is OK because it does mean that you will handle concurrent
+requests little bit better when they are low on CPU requirements; but when it
+start to come down to really heavy processing requirement in general you kind of
+want to match up your number CPU to number of cluster children used.
+

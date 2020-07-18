@@ -10,6 +10,8 @@
   "author": "Agung Tuanany",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "ora": "^4.0.5",
+    "require": "^2.4.20"
   }
 }

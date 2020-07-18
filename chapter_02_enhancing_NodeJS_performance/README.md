@@ -7,7 +7,8 @@
 4. [Forking Children](#forking-children)
 6. [Clustering in Action](#clustering-in-action)
 7. [Benchmarking Server Performance](#benchmarking-server-performance)
-8. [Need More Children | Benchmarking](#need-more-children-|-benchmarking)
+8. [Need More Children Benchmarking](#need-more-children-benchmarking)
+9. [PM2 Configuration](#pm2-configuration)
 
 
 # Enhancing Performance
@@ -263,7 +264,7 @@ procedure.
 <br/>
 <br/>
 
-## Need More Children | Benchmarking
+## Need More Children Benchmarking
 
 The case when use cluster to send a request into server with a larger amount of
 request is server performance start to drop off cause take more amount of time
@@ -551,5 +552,135 @@ documentation around clustering uses **logical core** instead.
 Using logical core is OK because it does mean that you will handle concurrent
 requests little bit better when they are low on CPU requirements; but when it
 start to come down to really heavy processing requirement in general you kind of
-want to match up your number CPU to number of cluster children used.
+want to** match up your number CPU to number of cluster children used**.
 
+**[⬆ back to top](#table-of-contents)**
+<br/>
+<br/>
+
+## PM2 Configuration
+
+The source in [index-pm2.js](./../example/index-pm2.js)
+
+```bash
+$ sudo npm install -g pm2
+
+// Run pm2
+$ pm2 start example/index-pm2.js
+
+[PM2] Starting
+$HOME/Project/Advanced-NodeJS-StephenGrider/example/index-pm2.js incluster_mode (0 instance)
+[PM2] Done.
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ index-pm2          │ cluster  │ 0    │ online    │ 0%       │ 34.9mb   │
+│ 1  │ index-pm2          │ cluster  │ 0    │ online    │ 0%       │ 30.0mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+
+$ pm2 list
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ index-pm2          │ cluster  │ 0    │ online    │ 0.4%     │ 42.1mb   │
+│ 1  │ index-pm2          │ cluster  │ 0    │ online    │ 0.5%     │ 41.9mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+
+// To get all details
+$ pm2 show index-pm2
+
+┌───────────────────┬───────────────────────────────────────────────────────────────────────┐
+│ status            │ online                                                                │
+│ name              │ index-pm2                                                             │
+│ namespace         │ default                                                               │
+│ version           │ 1.0.0                                                                 │
+│ restarts          │ 0                                                                     │
+│ uptime            │ 74m                                                                   │
+│ script path       │ /home/daun/Project/Advanced-NodeJS-StephenGrider/example/index-pm2.js │
+│ script args       │ N/A                                                                   │
+│ error log path    │ /home/daun/.pm2/logs/index-pm2-error.log                              │
+│ out log path      │ /home/daun/.pm2/logs/index-pm2-out.log                                │
+│ pid path          │ /home/daun/.pm2/pids/index-pm2-1.pid                                  │
+│ interpreter       │ node                                                                  │
+│ interpreter args  │ N/A                                                                   │
+│ script id         │ 1                                                                     │
+│ exec cwd          │ /home/daun/Project/Advanced-NodeJS-StephenGrider                      │
+│ exec mode         │ cluster_mode                                                          │
+│ node.js version   │ 14.5.0                                                                │
+│ node env          │ N/A                                                                   │
+│ watch & reload    │ ✘                                                                     │
+│ unstable restarts │ 0                                                                     │
+│ created at        │ 2020-07-18T01:43:53.990Z                                              │
+└───────────────────┴───────────────────────────────────────────────────────────────────────┘
+ Revision control metadata
+┌──────────────────┬───────────────────────────────────────────────────────────────┐
+│ revision control │ git                                                           │
+│ remote url       │ git@github.com:agungTuanany/Advanced-NodeJS-StephenGrider.git │
+│ repository root  │ /home/daun/Project/Advanced-NodeJS-StephenGrider              │
+│ last update      │ 2020-07-18T01:43:54.230Z                                      │
+│ revision         │ b4b02e31498802dc59f9600b498fb7a60602e103                      │
+│ comment          │ Chapter-2 Need more cluster childreen | intensive study case  │
+│ branch           │ master                                                        │
+└──────────────────┴───────────────────────────────────────────────────────────────┘
+ Actions available
+┌────────────────────────┐
+│ km:heapdump            │
+│ km:cpu:profiling:start │
+│ km:cpu:profiling:stop  │
+│ km:heap:sampling:start │
+│ km:heap:sampling:stop  │
+└────────────────────────┘
+ Trigger via: pm2 trigger index-pm2 <action_name>
+
+ Code metrics value
+┌────────────────────────┬──────────┐
+│ Heap Size              │ 9.39 MiB │
+│ Heap Usage             │ 88.69 %  │
+│ Used Heap Size         │ 8.33 MiB │
+│ Active requests        │ 0        │
+│ Active handles         │ 1        │
+│ Event Loop Latency     │ 0.89 ms  │
+│ Event Loop Latency p95 │ 6.00 ms  │
+└────────────────────────┴──────────┘
+
+$ pm2 monit
+
+┌─ Process List ────────┐┌──  index-pm2 Logs  ─────────────────────────────────────┐
+│[ 0] index-pm2         ││                                                         │
+│[ 1] index-pm2         ││                                                         │
+└───────────────────────┘└─────────────────────────────────────────────────────────┘
+┌─ Custom Metrics ──────┐┌─ Metadata ──────────────────────────────────────────────┐
+│ Heap Size      9.39   ││ App Name              index-pm2                         │
+│ Heap Usage     81.9   ││ Namespace             default                           │
+│ Used Heap Size        ││ Version               1.0.0                             │
+│ Active requests       ││ Restarts              0                                 │
+│ Active handles     1  ││ Uptime                79m                               │
+│ Event Loop Latency    ││ Script path           /home/daun/Project/Advanced-Node  │
+│ Event Loop Latency    ││ JS-StephenGrider/example/index-pm2.js                   │
+└───────────────────────┘└─────────────────────────────────────────────────────────┘
+
+ left/right: switch boards | up/down/mouse: scroll | Ctrl-C: exit      To go further
+check out https://pm2.io/
+
+$ pm2 delete index-pm2
+
+[PM2] Applying action deleteProcessId on app [index-pm2](ids: [ 0, 1 ])
+[PM2] [index-pm2](0) ✓
+[PM2] [index-pm2](1) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+```
+
+NOTE: Usually `pm2` use in production environments, So you will log on to some
+remote server through `ssh` and you can interact with `pm2` with commands.
+
+### What is PM2
+
+PM2 is cluster management solution So it has everything having to do with
+spawning (menelurkan) multiple instances of application and managing the health
+of every single applications.
+
+**[⬆ back to top](#table-of-contents)**
+<br/>
+<br/>

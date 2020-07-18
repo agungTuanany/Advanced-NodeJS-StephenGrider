@@ -17,8 +17,11 @@ process.env.UV_THREADPOOL_SIZE = 1
 const { Worker, isMainThread, parentPort, workerData } = require("worker_threads")
 const os = require("os")
 const path = require("path")
+// UI
+const inquirer = require("inquirer")
+const ora = require("ora")
 
-const userCPUCount = 1      //os.cpus().length
+const userCPUCount = os.cpus().length
 const workerPath = path.resolve("factorial-worker.js")
 
 const calculateFactorial = (number) => {
@@ -41,26 +44,61 @@ const calculateFactorial = (number) => {
             segments.push(segment)
         }
 
-        const result = await Promise.all(
-            segments.map(
-                segment =>
-                new Promise((resolve, reject) => {
-                    const worker = new Worker(workerPath, {
-                        workerData: segment
-                    })
+        try {
+            const results = await Promise.all(
+                segments.map(
+                    segment =>
+                    new Promise((resolve, reject) => {
+                        const worker = new Worker(workerPath, {
+                            workerData: segment
+                        })
 
-                    worker.on("message", resolve)
-                    worker.on("error", reject)
-                    worker.on("exit", code => {
-                        if (code !== 0) reject (new Error(`worker stopped with exit code ${code}`))
+                        worker.on("message", resolve)
+                        worker.on("error", reject)
+                        worker.on("exit", code => {
+                            if (code !== 0) reject (new Error(`worker stopped with exit code ${code}`))
+                        })
                     })
-                })
+                )
+
             )
 
-        )
-        console.log(result)
+            const finalResult = results.reduce((acc, val) => acc * val, 1)
+
+            console.log("finalResult:", finalResult)
+            console.log("results:", results)
+
+            parentResolve(finalResult)
+        }
+        catch (e) {
+            console.log("error in catch", e)
+            parentReject(e)
+        }
+
     })
 }
 
-calculateFactorial(10)
+const run = async () => {
+    const {inputNumber} = await inquirer.prompt([
+        {
+            type: "number",
+            name: "inputNumber",
+            message: "Calculate factorial for",
+            default: 10,
+        }
+    ])
+
+    // console.log("Calculating factorial for", inputNumber)
+
+    const spinner = ora("Calculating... ").start()
+
+    const result = await calculateFactorial(inputNumber)
+
+    spinner.succeed(`Result: ${result}`)
+}
+
+run()
+
+
+// calculateFactorial(10)
 

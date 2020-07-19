@@ -24,7 +24,8 @@ const ora = require("ora")
 const userCPUCount = os.cpus().length
 const workerPath = path.resolve("factorial-worker.js")
 
-const calculateFactorial = (number) => {
+// use worker for calculateFactorial
+const calculateFactorialWithWorker = (number) => {
     if (number === 0) {
         return 1
     }
@@ -82,6 +83,16 @@ const calculateFactorial = (number) => {
     })
 }
 
+// Normal calculateFactorial
+const calculateFactorial = (number) => {
+    const numbers = []
+    for (let i = 1n; i<= number; i++ ) {
+        numbers.push(i)
+    }
+    return numbers.reduce((acc, val) => acc * val, 1n)
+
+}
+
 const run = async () => {
     const {inputNumber} = await inquirer.prompt([
         {
@@ -94,11 +105,13 @@ const run = async () => {
 
     // console.log("Calculating factorial for", inputNumber)
 
-    const spinner = ora("Calculating... ").start()
+    const spinner = ora("Calculating with workers... ").start()
+    const result = await calculateFactorialWithWorker(BigInt(inputNumber))
+    spinner.succeed(`Worker result: ${result}`)
 
-    const result = await calculateFactorial(BigInt(inputNumber))
-
-    spinner.succeed(`Result: ${result}`)
+    const spinner2 = ora("Calculating... ").start()
+    const result2 = await calculateFactorial(BigInt(inputNumber))
+    spinner2.succeed(`Normal result: ${result2}`)
 }
 
 run()

@@ -91,6 +91,14 @@ const calculateFactorial = (number) => {
         numbers.push(i)
     }
     return numbers.reduce((acc, val) => acc * val, 1n)
+}
+
+const benchmarkFactorial = async (inputNumber, factorialFunction, label) => {
+    const spinner = ora(`Calculating with ${label}... `).start()
+    const startTime = process.hrtime()
+    const result = await factorialFunction(BigInt(inputNumber))
+    const diffTime = process.hrtime(startTime)
+    spinner.succeed(`${label} result: ${result}, done in: ${diffTime[0] * NS_PER_SEC + diffTime[1]} `)
 
 }
 
@@ -106,17 +114,8 @@ const run = async () => {
 
     // console.log("Calculating factorial for", inputNumber)
 
-    const spinner = ora("Calculating with workers... ").start()
-    const startTime = process.hrtime()
-    const result = await calculateFactorialWithWorker(BigInt(inputNumber))
-    const diffTime = process.hrtime(startTime)
-    spinner.succeed(`Worker result: ${result}, done in: ${diffTime[0] * NS_PER_SEC + diffTime[1]} `)
-
-    const spinner2 = ora("Calculating... ").start()
-    const startTime2 = process.hrtime()
-    const result2 = await calculateFactorial(BigInt(inputNumber))
-    const diffTime2 = process.hrtime(startTime2)
-    spinner2.succeed(`Normal result: ${result2},  done in: ${diffTime2[0] * NS_PER_SEC + diffTime2[1]}`)
+    await benchmarkFactorial(inputNumber, calculateFactorialWithWorker, "Worker")
+    await benchmarkFactorial(inputNumber, calculateFactorial, "Normal")
 }
 
 run()

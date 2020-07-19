@@ -98,7 +98,11 @@ const benchmarkFactorial = async (inputNumber, factorialFunction, label) => {
     const startTime = process.hrtime()
     const result = await factorialFunction(BigInt(inputNumber))
     const diffTime = process.hrtime(startTime)
-    spinner.succeed(`${label} result: ${result}, done in: ${diffTime[0] * NS_PER_SEC + diffTime[1]} `)
+    const time = diffTime[0] * NS_PER_SEC + diffTime[1]
+
+    spinner.succeed(`${label} result: ${result}, done in: ${time}`)
+
+    return time
 
 }
 
@@ -114,8 +118,12 @@ const run = async () => {
 
     // console.log("Calculating factorial for", inputNumber)
 
-    await benchmarkFactorial(inputNumber, calculateFactorialWithWorker, "Worker")
-    await benchmarkFactorial(inputNumber, calculateFactorial, "Normal")
+    const timeWorker = await benchmarkFactorial(inputNumber, calculateFactorialWithWorker, "Worker")
+    const timeLocal = await benchmarkFactorial(inputNumber, calculateFactorial, "Local")
+    const diff = timeLocal - timeWorker
+
+    console.log (`Difference between Local and Worker: ${Math.floor(diff / 1000000)}ms`)
+
 }
 
 run()

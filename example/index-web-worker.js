@@ -37,10 +37,6 @@ const calculateFactorial = (number) => {
             numbers.push(i)
         }
 
-        console.log(numbers)
-
-        return parentResolve(0)
-
         const segmentSize = Math.floor(numbers.length / userCPUCount)
         const segments = []
 
@@ -71,7 +67,7 @@ const calculateFactorial = (number) => {
                 )
             )
 
-            const finalResult = results.reduce((acc, val) => acc * val, 1)
+            const finalResult = results.reduce((acc, val) => acc * val, 1n)
 
             console.log("finalResult:", finalResult)
             console.log("results:", results)

@@ -23,6 +23,7 @@ const ora = require("ora")
 
 const userCPUCount = os.cpus().length
 const workerPath = path.resolve("factorial-worker.js")
+const NS_PER_SEC = 1e9
 
 // use worker for calculateFactorial
 const calculateFactorialWithWorker = (number) => {
@@ -106,12 +107,16 @@ const run = async () => {
     // console.log("Calculating factorial for", inputNumber)
 
     const spinner = ora("Calculating with workers... ").start()
+    const startTime = process.hrtime()
     const result = await calculateFactorialWithWorker(BigInt(inputNumber))
-    spinner.succeed(`Worker result: ${result}`)
+    const diffTime = process.hrtime(startTime)
+    spinner.succeed(`Worker result: ${result}, done in: ${diffTime[0] * NS_PER_SEC + diffTime[1]} `)
 
     const spinner2 = ora("Calculating... ").start()
+    const startTime2 = process.hrtime()
     const result2 = await calculateFactorial(BigInt(inputNumber))
-    spinner2.succeed(`Normal result: ${result2}`)
+    const diffTime2 = process.hrtime(startTime2)
+    spinner2.succeed(`Normal result: ${result2},  done in: ${diffTime2[0] * NS_PER_SEC + diffTime2[1]}`)
 }
 
 run()

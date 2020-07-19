@@ -97,6 +97,8 @@ dev.js
 ~*/
 note*.*
 *~/
+~*
+*~
 
 # temporary dir
 .data/

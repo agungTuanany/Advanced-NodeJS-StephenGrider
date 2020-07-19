@@ -25,12 +25,21 @@ const userCPUCount = os.cpus().length
 const workerPath = path.resolve("factorial-worker.js")
 
 const calculateFactorial = (number) => {
-    if (number == 0) {
+    if (number === 0) {
         return 1
     }
     return new Promise(async (parentResolve, parentReject) => {
 
-        const numbers = [...new Array(number)].map(( _,i ) => i + 1)
+        // Implement BigInt
+        const numbers = []                     /// [...new Array(number)].map((_,i ) => BigInt(i + 1))
+
+        for (let i = 1n; i <= number; i++) {
+            numbers.push(i)
+        }
+
+        console.log(numbers)
+
+        return parentResolve(0)
 
         const segmentSize = Math.floor(numbers.length / userCPUCount)
         const segments = []
@@ -60,7 +69,6 @@ const calculateFactorial = (number) => {
                         })
                     })
                 )
-
             )
 
             const finalResult = results.reduce((acc, val) => acc * val, 1)
@@ -92,7 +100,7 @@ const run = async () => {
 
     const spinner = ora("Calculating... ").start()
 
-    const result = await calculateFactorial(inputNumber)
+    const result = await calculateFactorial(BigInt(inputNumber))
 
     spinner.succeed(`Result: ${result}`)
 }

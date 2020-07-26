@@ -4,7 +4,7 @@
  *
  * Example chapter-2: using worker_threads
  *
- * I'm not using 'webworker-thrads' as 3rd party libs instead using standard
+ * I'm not using 'webworker-threads' as 3rd party libs instead using standard
  * library 'worker_threads'. As nodejs v12 `worker_threads` is stable
  *
  * extended tutorial: https://www.youtube.com/watch?v=eFJ7Q03jEVY
